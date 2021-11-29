@@ -12,6 +12,7 @@ import tensorflow as tf
 import pandas as pd
 import matplotlib as plt
 
+
 def model_define():
     inputs = (64, 64, 3)
     base_model = MobileNetV2(include_top=False, weights='imagenet', input_tensor=inputs)
@@ -24,25 +25,30 @@ def model_define():
     model = tf.keras.Model(inputs, outputs)
     return model
 
-def loading(train_link):
-    train_meta = './train/train_mask_enet.csv'
-    data = pd.read_csv(train_meta, sep=',', header= None)
-
-    for idx in range(data.shape[0]):
-        x =  plt.imread('./train/images_mask/' + data.iloc[idx, 3])
-        y = data.iloc[idx, 4]
 
 
-
-    return None
-
-def training():
-
-    return None
 
 def main():
-    train_link = './train/train_meta_mask.csv'
+    train_dir = './train/images_mask'
+    train_ds = tf.keras.utils.image_dataset_from_directory(train_dir, label_mode='int', color_mode='rgb',
+                                                           subset='training', batch_size='32',
+                                                           image_size=(64, 64), seed=123, validation_split=0.2)
+
+    val_ds = tf.keras.utils.image_dataset_from_directory(train_dir, label_mode='int', color_mode='rgb',
+                                                         subset='validation', batch_size='32',
+                                                         image_size=(64, 64), seed=123, validation_split=0.2)
+    model = model_define()
+    model.compile(
+        optimizer='adam',
+        loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+        metrics=['accuracy'])
+    with tf.device('/CPU:0'):
+        history = model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=30
+        )
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
     main()

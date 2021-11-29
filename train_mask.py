@@ -7,13 +7,14 @@ Pre trained: Mobilenetv2 as backbone
 '''
 
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications.efficientnet import EfficientNetB3
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 import tensorflow as tf
-
+import pandas as pd
+import matplotlib as plt
 
 def model_define():
-    inputs = (300, 300, 3)
-    base_model = EfficientNetB3(include_top=False, weights='imagenet', input_tensor=inputs)
+    inputs = (64, 64, 3)
+    base_model = MobileNetV2(include_top=False, weights='imagenet', input_tensor=inputs)
     x = tf.keras.layers.GlobalAveragePooling2D(name="avg_pool")(base_model.output)
     x = tf.keras.layers.BatchNormalization()(x)
     top_dropout_rate = 0.2
@@ -24,7 +25,14 @@ def model_define():
     return model
 
 def loading(train_link):
-    
+    train_meta = './train/train_mask_enet.csv'
+    data = pd.read_csv(train_meta, sep=',', header= None)
+
+    for idx in range(data.shape[0]):
+        x =  plt.imread('./train/images_mask/' + data.iloc[idx, 3])
+        y = data.iloc[idx, 4]
+
+
 
     return None
 

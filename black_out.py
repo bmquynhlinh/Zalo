@@ -68,10 +68,10 @@ def main():
     train_meta = train_dir + 'train_meta_mask.csv'
     data = pd.read_csv(train_meta, sep=',')
     if os.path.isfile('./train/train_mask_enet.csv'):
-        with open('./train/train_mask_enet.csv', 'w', newline='') as file:
+        with open('./train/train_mask_enet224.csv', 'w', newline='') as file:
             write = csv.writer(file)
             write.writerow(['frame_id', 'image_id', 'fname','f_image_name', 'mask'])
-    with open('./train/train_mask_enet.csv', 'a', newline='') as file:
+    with open('./train/train_mask_enet224.csv', 'a', newline='') as file:
         write = csv.writer(file)
         for idx in range(4175):  # data.size):4175
             print(data.iloc[idx, 2])
@@ -91,12 +91,12 @@ def main():
                 print(face_box[0] - h)
                 try:
                     face_save = img[ (face_box[1] - h): (face_box[1] + face_box[3] + 2 * h), (face_box[0] - h):(face_box[0] + face_box[2] + 2 * h), :]
-                    img_save = cv2.resize(face_save, (64, 64))
+                    img_save = cv2.resize(face_save, (224, 224))
                     if int(data.iloc[idx, 3])== int(0.0):
-                        plt.imsave(train_dir + 'images_mask/0/' + data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', img_save)
+                        plt.imsave(train_dir + 'images_mask_224/0/' + data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', img_save)
                         write.writerow([str(i), data.iloc[idx, 1], data.iloc[idx, 2], '0/'+data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', data.iloc[idx, 3]])
                     else:
-                        plt.imsave(train_dir + 'images_mask/1/' + data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(
+                        plt.imsave(train_dir + 'images_mask_224/1/' + data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(
                             i) + '.jpg', img_save)
                         write.writerow([str(i), data.iloc[idx, 1], data.iloc[idx, 2],'1/'+
                                         data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(i) + '.jpg',

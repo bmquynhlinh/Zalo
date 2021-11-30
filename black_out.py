@@ -64,10 +64,11 @@ def save_new():
 
 
 def main():
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
     train_dir = './train/'
     train_meta = train_dir + 'train_meta_mask.csv'
     data = pd.read_csv(train_meta, sep=',')
-    if os.path.isfile('./train/train_mask_enet.csv'):
+    if os.path.isfile('./train/train_mask_enet224.csv'):
         with open('./train/train_mask_enet224.csv', 'w', newline='') as file:
             write = csv.writer(file)
             write.writerow(['frame_id', 'image_id', 'fname','f_image_name', 'mask'])
@@ -81,27 +82,30 @@ def main():
             except:
                 continue
             faces = face_detection(img)
-            img_inv = np.zeros_like(img)
             i = 0
             for face in faces:
-                i += 1
-                print(i)
-                face_box = face['box']
-                h = np.round(face_box[2] * 0.2).astype(int)
-                print(face_box[0] - h)
-                try:
-                    face_save = img[ (face_box[1] - h): (face_box[1] + face_box[3] + 2 * h), (face_box[0] - h):(face_box[0] + face_box[2] + 2 * h), :]
-                    img_save = cv2.resize(face_save, (224, 224))
-                    if int(data.iloc[idx, 3])== int(0.0):
-                        plt.imsave(train_dir + 'images_mask_224/0/' + data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', img_save)
-                        write.writerow([str(i), data.iloc[idx, 1], data.iloc[idx, 2], '0/'+data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', data.iloc[idx, 3]])
-                    else:
-                        plt.imsave(train_dir + 'images_mask_224/1/' + data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(
-                            i) + '.jpg', img_save)
-                        write.writerow([str(i), data.iloc[idx, 1], data.iloc[idx, 2],'1/'+
-                                        data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(i) + '.jpg',
-                                        data.iloc[idx, 3]])
-                except:
+                print(face['confidence'])
+                if face['confidence'] > 0.9:
+                    i += 1
+                    print(i)
+                    face_box = face['box']
+                    h = np.round(face_box[2] * 0.2).astype(int)
+                    print(face_box[0] - h)
+                    try:
+                        face_save = img[ (face_box[1] - h): (face_box[1] + face_box[3] + 2 * h), (face_box[0] - h):(face_box[0] + face_box[2] + 2 * h), :]
+                        img_save = cv2.resize(face_save, (224, 224))
+                        if int(data.iloc[idx, 3])== int(0.0):
+                            plt.imsave(train_dir + 'images_mask_224/0/' + data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', img_save)
+                            write.writerow([str(i), data.iloc[idx, 1], data.iloc[idx, 2], '0/'+data.iloc[idx, 2].replace('.jpg','') +'_f_'+ str(i)+'.jpg', data.iloc[idx, 3]])
+                        else:
+                            plt.imsave(train_dir + 'images_mask_224/1/' + data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(
+                                i) + '.jpg', img_save)
+                            write.writerow([str(i), data.iloc[idx, 1], data.iloc[idx, 2],'1/'+
+                                            data.iloc[idx, 2].replace('.jpg', '') + '_f_' + str(i) + '.jpg',
+                                            data.iloc[idx, 3]])
+                    except:
+                        continue
+                else:
                     continue
         #     print(face['box'])
         #     img_inv = black_out(img_inv, face['box'])

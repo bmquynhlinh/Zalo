@@ -24,7 +24,7 @@ def model_define():
     x = tf.keras.layers.BatchNormalization()(x)
     top_dropout_rate = 0.2
     x = tf.keras.layers.Dropout(top_dropout_rate, name="top_dropout")(x)
-    outputs = tf.keras.layers.Dense(2, activation="softmax", name="pred")(x)
+    outputs = tf.keras.layers.Dense(1, activation="sigmoid", name="pred")(x)
     # Compile
     model = tf.keras.Model(inputs, outputs)
     print(model.summary())
@@ -36,14 +36,14 @@ def main():
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
     # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     train_dir = './train/image_mask_224'
-    model_link = 'mobile_facemask_4'
+    model_link = 'mobile_facemask_5'
     train_ds = tf.keras.utils.image_dataset_from_directory(train_dir, color_mode='rgb', labels='inferred',
-                                                           label_mode='categorical',
+                                                           label_mode='binary',
                                                            subset='training', batch_size=32,
                                                            image_size=(96, 96), seed=1, validation_split=0.2)
 
     val_ds = tf.keras.utils.image_dataset_from_directory(train_dir, color_mode='rgb', labels='inferred',
-                                                         label_mode='categorical',
+                                                         label_mode='binary',
                                                          subset='validation', batch_size=32,
                                                          image_size=(96, 96), seed=1, validation_split=0.2)
     rescale = tf.keras.layers.Rescaling(scale=1. / 127.5, offset=-1)
@@ -59,7 +59,7 @@ def main():
     model = model_define()
     model.compile(
         optimizer=tf.keras.optimizers.Adam(1e-3),
-        loss=tf.keras.losses.CategoricalCrossentropy(),
+        loss=tf.keras.losses.BinaryCrossentropy(),
         metrics=['accuracy'])
     callbacks = [
         # EarlyStopping(patience=10, verbose=1),
@@ -70,7 +70,7 @@ def main():
     history = model.fit(
         train_ds,
         validation_data=val_ds,
-        epochs=50,
+        epochs=30,
         callbacks=callbacks
     ).history
     pd.DataFrame.from_dict(history).to_csv('history' + model_link + '.csv', index=False)
